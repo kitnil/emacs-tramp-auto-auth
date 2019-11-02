@@ -131,24 +131,11 @@ authenticate to remote servers."
 		    (lambda (tramp-action-password proc vec)
 		      (pcase (or (car (last vec)) "")
 			((and (app (lambda (expval)
-				     (assoc-default expval
-						    tramp-auto-auth-alist
+				     (assoc-default expval tramp-auto-auth-alist
 						    #'string-match-p))
-				   spec)
-			      (guard spec)
-			      (let pre-secret (plist-get
-					       (car (apply
-						     #'auth-source-search
-						     spec))
-					       :secret))
-			      (guard pre-secret)
-			      (let secret (if (functionp pre-secret)
-					      (funcall pre-secret)
-					    pre-secret))
-			      (guard secret))
-			 (when (and spec pre-secret)  ; See [0] below.
-                           (process-send-string
-                            proc (concat secret tramp-local-end-of-line))))
+				   passwd)
+			      (guard passwd))
+			 (process-send-string proc (concat passwd tramp-local-end-of-line)))
 			(_ (funcall tramp-action-password proc vec))))
 		    '((name . tramp-auto-auth-mode)))
 	(advice-add #'tramp-action-yesno :around
